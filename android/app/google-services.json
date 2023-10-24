@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "482120651039",
+    "project_id": "turnarix",
+    "storage_bucket": "turnarix.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482120651039:android:2683a903215e80a136202a",
+        "android_client_info": {
+          "package_name": "com.turnarix.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjS_iv2RmHSF3et1uq6IMHziiZJa7KYqs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
