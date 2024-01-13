@@ -1,15 +1,22 @@
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:turnarix/Theme/light_theme.dart';
 import 'package:turnarix/provider/auth_provider.dart';
 import 'package:turnarix/provider/calendar_provider.dart';
+import 'package:turnarix/provider/chat_provider.dart';
 import 'package:turnarix/provider/localization_provider.dart';
 import 'package:turnarix/provider/profile_provider.dart';
+import 'package:turnarix/provider/saved_shift_provider.dart';
+import 'package:turnarix/provider/shift_exchange_provider.dart';
 import 'package:turnarix/provider/shifts_provider.dart';
+import 'package:turnarix/provider/statistics/vacation_statistics_provider.dart';
 import 'package:turnarix/provider/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:turnarix/provider/vacation_provider.dart';
+import 'package:turnarix/provider/worker_calendar_provider.dart';
 import 'di_container.dart' as di;
 import 'package:turnarix/provider/splash_provider.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +42,14 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (context) => di.sl<ThemeProvider>()),
       ChangeNotifierProvider(create: (context) => di.sl<CalendarProvider>()),
       ChangeNotifierProvider(create: (context) => di.sl<ShiftsProvider>()),
+      ChangeNotifierProvider(create: (context) => di.sl<SavedShiftProvider>()),
+      ChangeNotifierProvider(create: (context) => di.sl<ChatProvider>()),
+      ChangeNotifierProvider(create: (context) => di.sl<WorkerCalendarProvider>()),
+      ChangeNotifierProvider(create: (context) => di.sl<ShiftExchangeProvider>()),
+      ChangeNotifierProvider(create: (context) => di.sl<VacationProvider>()),
 
+      // STATISTICS
+      ChangeNotifierProvider(create: (context) => di.sl<VacationStatisticsProvider>()),
     ],
     child: MyApp(),
   ));
@@ -70,6 +84,7 @@ class _MyAppState extends State<MyApp> {
           title: 'Turnarix',
           debugShowCheckedModeBanner: false,
           navigatorKey: MyApp.navigatorKey,
+          builder: FlutterSmartDialog.init(),
         );
       },
     );

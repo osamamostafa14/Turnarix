@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:turnarix/data/helper/email_checker.dart';
 import 'package:turnarix/data/model/response/signup_model.dart';
 import 'package:provider/provider.dart';
+import 'package:turnarix/provider/auth_provider.dart';
 import 'package:turnarix/provider/profile_provider.dart';
 import 'package:turnarix/provider/splash_provider.dart';
 import 'package:turnarix/utill/app_constants.dart';
@@ -22,28 +25,19 @@ class PersonalInfoScreen extends StatefulWidget {
 
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
-  FocusNode _fullNameFocus = FocusNode();
-  FocusNode _emailFocus = FocusNode();
-  FocusNode _phoneNumberAFocus = FocusNode();
-  FocusNode _phoneNumberBFocus = FocusNode();
-  FocusNode _phoneNumberCFocus = FocusNode();
-  FocusNode _addressFocus = FocusNode();
-  FocusNode _ssnAFocus = FocusNode();
-  FocusNode _ssnBFocus = FocusNode();
-  FocusNode _ssnCFocus = FocusNode();
+  FocusNode _nameFocus = FocusNode();
+  FocusNode _surNameFocus = FocusNode();
+
+  TextEditingController? _nameController;
+  TextEditingController? _surNameController;
+
+  TextEditingController? _phoneController;
+  final TextEditingController valueController = TextEditingController();
+  List<String> _options = [];
+
   FocusNode _passwordFocus = FocusNode();
   FocusNode _confirmPasswordFocus = FocusNode();
 
-  TextEditingController? _fullNameController;
-  TextEditingController? _emailController;
-  TextEditingController? _phoneNumberAController;
-  TextEditingController? _phoneCodeController;
-  TextEditingController? _phoneNumberBController;
-  TextEditingController? _phoneNumberCController;
-  TextEditingController? _addressController;
-  TextEditingController? _ssnFieldAController;
-  TextEditingController? _ssnFieldBController;
-  TextEditingController? _ssnFieldCController;
   TextEditingController? _passwordController;
   TextEditingController? _confirmPasswordController;
 
@@ -53,50 +47,42 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   PickedFile? data;
   final picker = ImagePicker();
 
+  String? _roleName;
+  int? _roleId;
+
   @override
   void initState() {
     super.initState();
     _formKeyLogin = GlobalKey<FormState>();
-    _fullNameController = TextEditingController();
-    _emailController = TextEditingController();
-    _phoneNumberAController = TextEditingController();
-    _phoneNumberBController = TextEditingController();
-    _phoneNumberCController = TextEditingController();
-    _phoneCodeController = TextEditingController();
-    _addressController = TextEditingController();
-    _ssnFieldAController = TextEditingController();
-    _ssnFieldBController = TextEditingController();
-    _ssnFieldCController = TextEditingController();
+    _nameController = TextEditingController();
+    _surNameController = TextEditingController();
+    _phoneController = TextEditingController();
+
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
 
-    if(Provider.of<ProfileProvider>(context, listen: false).userInfoModel!=null){
-      _fullNameController!.text = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.name!;
-      _emailController!.text = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.email!;
+    _nameController!.text = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.name!;
+    _surNameController!.text = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.surname!;
+    _phoneController!.text = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.phone!;
 
 
-      _addressController!.text = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.address!;
-      String phoneValue = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.phone!;
-      _phoneNumberAController!.text = phoneValue.substring(0, 3);
-      _phoneNumberBController!.text = phoneValue.substring(3, 6);
-      _phoneNumberCController!.text = phoneValue.substring(6);
-    }
+    _roleName = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.roleName;
+    _roleId = Provider.of<ProfileProvider>(context, listen: false).userInfoModel!.roleId;
+    Provider.of<ProfileProvider>(context, listen: false).setRole(_roleName!, _roleId!);
 
-    _phoneCodeController!.text = '+1';
+    Timer(Duration(seconds: 2), () {
+      Provider.of<ProfileProvider>(context, listen: false).getEmployeeRoles(context);
+    });
+
   }
 
   @override
   void dispose() {
-    _emailController!.dispose();
-    _fullNameController!.dispose();
-    _phoneNumberAController!.dispose();
-    _phoneNumberBController!.dispose();
-    _phoneNumberCController!.dispose();
-    _addressController!.dispose();
-    _ssnFieldAController!.dispose();
-    _ssnFieldBController!.dispose();
-    _ssnFieldCController!.dispose();
+    _nameController!.dispose();
+    _surNameController!.dispose();
+    _phoneController!.dispose();
     _passwordController!.dispose();
+    _confirmPasswordController!.dispose();
     super.dispose();
   }
 
@@ -119,23 +105,28 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: ColorResources.BG_SECONDRY,
       appBar: AppBar(
-        title: Text('Personal info', style: TextStyle(color: Colors.white)),
+        title: Text('Informazioni personali', style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        backgroundColor: Theme.of(context!).primaryColor,
+        backgroundColor: ColorResources.BG_SECONDRY,
         elevation: 0.2,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-        ),
+        // leading: IconButton(
+        //   onPressed: () {
+        //     Navigator.of(context).pop();
+        //   },
+        //   icon: Icon(Icons.arrow_back, color: Colors.white),
+        // ),
       ),
       body: SafeArea(
           child:
           Consumer<ProfileProvider>(
               builder: (context, profileProvider, child){
+                Provider.of<AuthProvider>(context, listen: false).employeeRoles.forEach((role) {
+                  if(!_options.contains(role.name!)){
+                    _options.add(role.name!);
+                  }
+                });
                 return  Center(
                   child:Scrollbar(
                     child: SingleChildScrollView(
@@ -186,11 +177,16 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                               width: 80,
                                               height: 80,
                                               fit: BoxFit.fill)
-                                              : FadeInImage.assetNetwork(
+                                              :
+                                          profileProvider.userInfoModel!.image !=null?
+                                          FadeInImage.assetNetwork(
                                             placeholder: Images.profile_icon,
                                             image: '${Provider.of<SplashProvider>(context,).baseUrls!.customerImageUrl}/${profileProvider.userInfoModel!.image}',
                                             height: 80, width: 80, fit: BoxFit.cover,
-                                          ),
+                                          ): SizedBox(
+                                              height: 80,
+                                              width: 80,
+                                              child: Icon(Icons.person)),
                                         ),
                                         Positioned(
                                           bottom: 15,
@@ -223,11 +219,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
 
                                 Align(
+                                    alignment: Alignment.center,
+                                    child: Text('${profileProvider.userInfoModel!.email}', style: TextStyle(color: Colors.white70))),
+
+                                const SizedBox(height: 20),
+
+
+                                Align(
                                     alignment: Alignment.topLeft,
                                     child: Padding(
                                       padding: const EdgeInsets.only(left: 20),
-                                      child: Text('Enter Full name',
-                                          style: TextStyle(color: Theme.of(context).textTheme.headline2!.color, fontSize: 16)),
+                                      child: Text('Nome',
+                                          style: TextStyle(color: Colors.white60, fontSize: 16)),
                                     )),
 
                                 const SizedBox(height: 10),
@@ -237,16 +240,17 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                     child: Padding(
                                       padding: const EdgeInsets.only(left: 20, right: 20),
                                       child:  CustomTextField(
-                                        hintText: 'Mr. John',
+                                        hintText: '',
                                         isShowBorder: true,
+                                        inputColor: Colors.white,
+                                        fillColor: ColorResources.BG_SECONDRY,
                                         inputType: TextInputType.text,
                                         inputAction: TextInputAction.next,
-                                        focusNode: _fullNameFocus,
-                                        controller: _fullNameController,
+                                        focusNode: _nameFocus,
+                                        controller: _nameController,
                                         isIcon: true,
                                         isShowPrefixIcon: true,
                                         prefixIconUrl: Images.user_icon,
-                                        isEnabled: false,
                                       ),
                                     )),
 
@@ -256,138 +260,185 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                     alignment: Alignment.topLeft,
                                     child: Padding(
                                       padding: const EdgeInsets.only(left: 20),
-                                      child: Text('Inserisci l\'indirizzo email',
-                                          style: TextStyle(color: Theme.of(context).textTheme.headline2!.color, fontSize: 16)),
+                                      child: Text('Cognome',
+                                          style: TextStyle(color: Colors.white60, fontSize: 16)),
                                     )),
+
                                 const SizedBox(height: 10),
+
                                 Align(
                                     alignment: Alignment.topLeft,
                                     child: Padding(
                                       padding: const EdgeInsets.only(left: 20, right: 20),
                                       child:  CustomTextField(
-                                        hintText: 'example@gmail.com',
+                                        hintText: '',
                                         isShowBorder: true,
-                                        inputType: TextInputType.emailAddress,
+                                        inputType: TextInputType.text,
                                         inputAction: TextInputAction.next,
-                                        focusNode: _emailFocus,
-                                        controller: _emailController,
+                                        focusNode: _surNameFocus,
+                                        controller: _surNameController,
+                                        inputColor: Colors.white,
+                                        fillColor: ColorResources.BG_SECONDRY,
                                         isIcon: true,
                                         isShowPrefixIcon: true,
-                                        prefixIconUrl: Images.message_icon,
-                                        isEnabled: false,
+                                        prefixIconUrl: Images.user_icon,
                                       ),
                                     )),
+
+                                // Align(
+                                //     alignment: Alignment.topLeft,
+                                //     child: Padding(
+                                //       padding: const EdgeInsets.only(left: 20),
+                                //       child: Text('Inserisci l\'indirizzo email',
+                                //           style: TextStyle(color: Theme.of(context).textTheme.headline2!.color, fontSize: 16)),
+                                //     )),
+                                // const SizedBox(height: 10),
+                                // Align(
+                                //     alignment: Alignment.topLeft,
+                                //     child: Padding(
+                                //       padding: const EdgeInsets.only(left: 20, right: 20),
+                                //       child:  CustomTextField(
+                                //         hintText: 'example@gmail.com',
+                                //         isShowBorder: true,
+                                //         inputType: TextInputType.emailAddress,
+                                //         inputAction: TextInputAction.next,
+                                //         focusNode: _emailFocus,
+                                //         controller: _emailController,
+                                //         isIcon: true,
+                                //         isShowPrefixIcon: true,
+                                //         prefixIconUrl: Images.message_icon,
+                                //         isEnabled: false,
+                                //       ),
+                                //     )),
+
+
+                                /// roles
+                                const SizedBox(height: 20),
+
+                                Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 20),
+                                      child: Text('Qual\'è il tuo ambito lavorativo?',
+                                          style: TextStyle(color: Colors.white60, fontSize: 16)),
+                                    )),
+
+                                const SizedBox(height: 10),
+
+                                Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 20, right: 20),
+                                    child: InkWell(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext? context) {
+                                            return AlertDialog(
+                                              backgroundColor: ColorResources.BG_SECONDRY,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(30.0),
+
+                                              ),
+                                              //title: Text("Hint", style: TextStyle(color: Theme.of(context!).primaryColor, fontSize: 15)),
+                                              content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  for(int i = 0; i <  profileProvider.employeeRoles.length ; i++)
+                                                    Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        InkWell(
+                                                            onTap : () {
+                                                              profileProvider.setRole(
+                                                                  profileProvider.employeeRoles[i].name!,
+                                                                  profileProvider.employeeRoles[i].id!);
+                                                              Navigator.pop(context!);
+                                                            },
+                                                            child: Row(
+                                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                                              children: [
+                                                                Expanded(
+                                                                  child: SizedBox(
+                                                                    height: 30,
+                                                                    child: Text("${profileProvider.employeeRoles[i].name}",
+                                                                        style: TextStyle(color:
+                                                                        Colors.white, fontSize: 16)),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            )),
+                                                        i!=profileProvider.employeeRoles.length - 1?
+                                                        const Padding(
+                                                          padding:  EdgeInsets.only(bottom: 8),
+                                                          child:  Divider(color: Colors.white60),
+                                                        ): const SizedBox(),
+                                                      ],
+                                                    ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                            color: ColorResources.BG_SECONDRY,
+                                            borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                            border: Border.all(width: 1, color: Theme.of(context).primaryColor)
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text('${profileProvider.roleName}', style:
+                                            TextStyle(color: Colors.white, fontSize: 16)),
+                                            const SizedBox(width: 10),
+                                            Transform(
+                                              alignment: Alignment.center,
+                                              transform: Matrix4.rotationZ(-90.0 * (pi / 180.0)),
+                                              child: Icon(Icons.arrow_back_ios_sharp, size: 18, color: Colors.white60),
+                                            ),
+                                            const SizedBox(width: 15),
+
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                ///end roles
 
                                 /// Phone Number
                                 const SizedBox(height: 20),
 
+
                                 Align(
                                     alignment: Alignment.topLeft,
                                     child: Padding(
                                       padding: const EdgeInsets.only(left: 20),
-                                      child: Text('Phone Number', style: TextStyle(color: Theme.of(context).textTheme.headline2!.color, fontSize: 16)),
+                                      child: Text('Qual\'è il tuo numero di telefono?',
+                                          style: TextStyle(color: Colors.white60, fontSize: 16)),
                                     )),
+
                                 const SizedBox(height: 10),
 
                                 Padding(
                                   padding: const EdgeInsets.only(left: 20, right: 20, top: 0),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-
-                                      Expanded(
-                                        child: CustomTextField(
-                                          maxLength: 3,
-                                          hintText: '',
-                                          isShowBorder: true,
-                                          inputType: TextInputType.number,
-                                          inputAction: TextInputAction.next,
-                                          controller: _phoneCodeController,
-                                          isIcon: true,
-                                          isEnabled: false,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 7),
-                                      Expanded(
-                                        child: CustomTextField(
-                                          maxLength: 3,
-                                          hintText: '',
-                                          isShowBorder: true,
-                                          inputType: TextInputType.number,
-                                          inputAction: TextInputAction.next,
-                                          focusNode: _phoneNumberAFocus,
-                                          controller: _phoneNumberAController,
-                                          isIcon: true,
-                                          nextFocus: _phoneNumberBFocus,
-                                          isEnabled: false,
-                                        ),
-                                      ),
-
-                                      const SizedBox(width: 7),
-
-                                      Expanded(
-                                        child: CustomTextField(
-                                          maxLength: 3,
-                                          hintText: '',
-                                          isShowBorder: true,
-                                          inputType: TextInputType.number,
-                                          inputAction: TextInputAction.next,
-                                          focusNode: _phoneNumberBFocus,
-                                          controller: _phoneNumberBController,
-                                          isIcon: true,
-                                          nextFocus: _phoneNumberCFocus,
-                                          isEnabled: false,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 7),
-                                      Expanded(
-                                        child: CustomTextField(
-                                          maxLength: 4,
-                                          hintText: '',
-                                          isShowBorder: true,
-                                          inputType: TextInputType.number,
-                                          inputAction: TextInputAction.next,
-                                          focusNode: _phoneNumberCFocus,
-                                          controller: _phoneNumberCController,
-                                          isIcon: true,
-                                          nextFocus: _phoneNumberCFocus,
-                                          isEnabled: false,
-                                        ),
-                                      ),
-
-                                    ],
+                                  child:   CustomTextField(
+                                    maxLength: 12,
+                                    hintText: 'Ex: +393*********',
+                                    isShowBorder: true,
+                                    inputType: TextInputType.number,
+                                    inputAction: TextInputAction.next,
+                                    controller: _phoneController,
+                                    inputColor: Colors.white,
+                                    fillColor: ColorResources.BG_SECONDRY,
+                                    // isIcon: true,
                                   ),
                                 ),
-
                                 /// End Phone Number
 
-                                const SizedBox(height: 20),
-                                /// Address
-                                Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 20),
-                                      child: Text('Address', style: TextStyle(color: Theme.of(context).textTheme.headline2!.color, fontSize: 16)),
-                                    )),
-                                const SizedBox(height: 10),
-                                Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 20, right: 20),
-                                      child:  CustomTextField(
-                                        hintText: 'EX: MONTREAL QC H3Z 2Y7',
-                                        isShowBorder: true,
-                                        inputType: TextInputType.text,
-                                        inputAction: TextInputAction.next,
-                                        focusNode: _addressFocus,
-                                        controller: _addressController,
-                                        isIcon: true,
-                                      //  isShowPrefixIcon: true,
-                                       // prefixIconUrl: Images.location_icon,
-                                        nextFocus: _ssnAFocus,
-                                      ),
-                                    )),
-                                // End Address
 
                                 const SizedBox(height: 20),
 
@@ -397,12 +448,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                       padding: const EdgeInsets.only(left: 20),
                                       child: Row(
                                         children: [
-                                          Text('Password ', style: TextStyle(color: Theme.of(context).textTheme.headline2!.color, fontSize: 16)),
+                                          Text('Password ', style: TextStyle(color: Colors.white60, fontSize: 16)),
 
                                           const SizedBox(width: 7),
 
-                                          Text('(Fill only if you want to change it) ',
-                                              style: TextStyle(color: Theme.of(context).textTheme.headline2!.color!.withOpacity(0.7), fontSize: 14)),
+                                          Text('(Compila solo se vuoi modificarlo) ',
+                                              style: TextStyle(color: Colors.white60, fontSize: 14)),
                                         ],
                                       ),
                                     )),
@@ -422,6 +473,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                         isShowPrefixIcon: true,
                                         isShowSuffixIcon: true,
                                         prefixIconUrl: Images.lock_icon,
+                                        inputColor: Colors.white,
+                                        fillColor: ColorResources.BG_SECONDRY,
 
                                       ),
                                     )),
@@ -432,7 +485,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                     alignment: Alignment.topLeft,
                                     child: Padding(
                                       padding: const EdgeInsets.only(left: 20),
-                                      child: Text('Conferma password', style: TextStyle(color: Theme.of(context).textTheme.headline2!.color, fontSize: 16)),
+                                      child: Text('Conferma password', style: TextStyle(color: Colors.white60, fontSize: 16)),
                                     )),
                                 const SizedBox(height: 10),
                                 Align(
@@ -450,7 +503,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                         isShowPrefixIcon: true,
                                         isShowSuffixIcon: true,
                                         prefixIconUrl: Images.lock_icon,
-
+                                        inputColor: Colors.white,
+                                        fillColor: ColorResources.BG_SECONDRY,
                                       ),
                                     )),
 
@@ -458,26 +512,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                                 Padding(
                                   padding: const EdgeInsets.only(left: 20, right: 20),
-                                  child: CustomButton(btnTxt: 'Update',
+                                  child: CustomButton(btnTxt: 'Aggiornamento',
                                       onTap: () async {
                                         FocusScope.of(context).unfocus();
 
-                                        String _fullName =
-                                        _fullNameController!.text.trim();
+                                        String _name =
+                                        _nameController!.text.trim();
 
-                                        String _email =
-                                        _emailController!.text.trim();
+                                        String _surName =
+                                        _surNameController!.text.trim();
 
                                         String _phone =
-                                            '${_phoneNumberAController!.text.trim()}${_phoneNumberBController!.text.trim()}${_phoneNumberCController!.text.trim()}';
-
-
-                                        String _address =
-                                        _addressController!.text.trim();
-
-                                        String _socialSecurityNumber =
-                                            '${_ssnFieldAController!.text.trim()}${_ssnFieldBController!.text.trim()}${_ssnFieldCController!.text.trim()}';
-
+                                        _phoneController!.text.trim();
 
                                         String _password =
                                         _passwordController!.text.trim();
@@ -485,38 +531,45 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                         String _confirmPassword =
                                         _confirmPasswordController!.text.trim();
 
-                                        if (_email.isEmpty) {
-                                          showCustomSnackBar('Inserisci l\'indirizzo email', context);
-                                        }else if (EmailChecker.isNotValid(_email)) {
-                                          showCustomSnackBar('Inserire un\'email valida', context);
-                                        }
-                                        else if (_fullName.isEmpty) {
+                                        if (_name.isEmpty) {
                                           showCustomSnackBar(
-                                              'Enter full name',
+                                              'il campo del nome è vuoto',
                                               context);
                                         }
-                                        else if (_socialSecurityNumber.isEmpty) {
+                                        else if (_surName.isEmpty) {
                                           showCustomSnackBar(
-                                              'Enter social security number',
+                                              'il campo cognome è vuoto',
                                               context);
                                         }
-                                        else if (_phone.length < 10) {
-                                          showCustomSnackBar(
-                                              'Enter valid phone number',
-                                              context);
+                                        else if (profileProvider.roleId == null) {
+                                          showCustomSnackBar('seleziona il tuo spazio di lavoro', context);
                                         }
-                                        else if (_address.isEmpty) {
+                                        else if (_phone.isEmpty) {
+                                          showCustomSnackBar('il campo del numero di telefono è vuoto', context);
+                                        }else if (_phone.length < 8) {
+                                          showCustomSnackBar('Si prega di inserire il numero di telefono valido', context);
+                                        }
+                                        else if ((_password.isNotEmpty &&
+                                            _password.length < 6) ||
+                                            (_confirmPassword.isNotEmpty &&
+                                                _confirmPassword.length < 6)) {
                                           showCustomSnackBar(
-                                              'Enter your address',
+                                              'La password deve contenere più di 6 caratteri',
+                                              context);
+                                        } else if (_password !=
+                                            _confirmPassword) {
+                                          showCustomSnackBar(
+                                              'La password non corrisponde',
                                               context);
                                         }
                                       else {
                                           SignUpModel signUpModel = SignUpModel(
-                                              name: _fullName,
-                                              email: _email,
+                                              name: _name,
+                                              surname: _surName,
+                                              roleName: profileProvider.roleName,
+                                              roleId: profileProvider.roleId,
                                               password: _password,
                                               phone: _phone,
-                                              address: _address,
                                           );
 
                                           var box = Hive.box('myBox');

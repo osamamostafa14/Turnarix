@@ -3,6 +3,8 @@ class UserInfoModel {
   String? name;
   String? surname;
   String? email;
+  String? roleName;
+  int? roleId;
   String? address;
   String? image;
   int? isPhoneVerified;
@@ -21,6 +23,8 @@ class UserInfoModel {
         this.name,
         this.surname,
         this.email,
+        this.roleName,
+        this.roleId,
         this.address,
         this.image,
         this.isPhoneVerified,
@@ -40,6 +44,8 @@ class UserInfoModel {
     name = json['name'];
     surname = json['surname'];
     email = json['email'];
+    roleName = json['role_name'];
+    roleId = json['role_id'];
     address = json['address'];
     image = json['image'];
     isPhoneVerified = json['is_phone_verified'];

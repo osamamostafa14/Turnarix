@@ -21,22 +21,45 @@ class AppConstants {
  static const String REGISTER_IMAGES_URI = '/api/v1/customer/register-images';
  static const String VERIFY_EMAIL_URI = '/api/v1/auth/verify-email';
 
- /// DRIVER AUTH
- static const String DRIVER_LOGIN_URI = '/api/v1/driver-auth/login';
- static const String DRIVER_TOKEN_URI = '/api/v1/driver/cm-firebase-token';
- static const String DRIVER_SOCIAL_LOGIN_URI = '/api/v1/driver-auth/social-login';
- static const String DRIVER_REGISTER_URI = '/api/v1/driver-auth/register';
- static const String DRIVER_CHECK_EMAIL_URI = '/api/v1/driver-auth/check-email';
- static const String DRIVER_VERIFY_TOKEN_URI = '/api/v1/driver-auth/verify-token';
- static const String DRIVER_VERIFY_PASSWORD_TOKEN_URI = '/api/v1/driver-auth/verify-password-token';
- static const String DRIVER_FORGET_PASSWORD_URI = '/api/v1/driver-auth/forgot-password';
- static const String DRIVER_RESET_PASSWORD_URI = '/api/v1/driver-auth/reset-password';
- static const String DRIVER_REGISTER_IMAGES_URI = '/api/v1/driver/register-images';
- static const String DRIVER_VERIFY_EMAIL_URI = '/api/v1/driver-auth/verify-email';
+ /// SHIFTS
+ static const String NEW_SHIFT_URI = '/api/v1/customer/shifts/add-new';
+ static const String ADD_INTERVALS_URI = '/api/v1/customer/shifts/add-intervals';
+ static const String GET_INTERVALS_URI = '/api/v1/customer/shifts/get-intervals';
+ static const String STORE_INTERVAL_INFO_URI = '/api/v1/customer/shifts/store-interval-info';
+ static const String STORE_NEW_INTERVAL_INFO_URI = '/api/v1/customer/shifts/store-new-interval-info';
+ static const String SHIFTS_LIST_URI = '/api/v1/customer/shifts/list';
+ static const String ADD_TO_CALENDAR_URI = '/api/v1/customer/calendar/add-to-calendar';
+ static const String ADD_VACATION_TO_CALENDAR_URI = '/api/v1/customer/vacation/add-to-calendar';
 
- // DRIVER PROFILE
- static const String DRIVER_INFO_URI = '/api/v1/driver/info';
- static const String UPDATE_DRIVER_VEHICLE_INFO_URI = '/api/v1/driver/profile/vehicle-info';
+ static const String UPDATE_SHIFT_NAME_URI = '/api/v1/customer/shifts/update/name';
+ static const String REMOVE_INTERVAL_URI = '/api/v1/customer/shifts/update/remove-interval';
+
+// static const String ADD_VACATION_URI = '/api/v1/customer/shifts/add-vacation';
+// static const String UPDATE_VACATION_URI = '/api/v1/customer/shifts/update-vacation';
+
+
+ /// CALENDAR
+ static const String CALENDAR_SHIFTS_URI = '/api/v1/customer/calendar/calendar-info';
+ static const String SHIFT_INTERVALS_URI = '/api/v1/customer/calendar/intervals';
+ static const String REMOVE_SHIFT_FROM_CALENDAR_URI = '/api/v1/customer/calendar/remove-calendar-shift';
+
+ /// WORKER CALENDAR
+ static const String WORKER_CALENDAR_SHIFTS_URI = '/api/v1/customer/calendar/employee/calendar-info';
+ static const String WORKER_SHIFT_INTERVALS_URI = '/api/v1/customer/calendar/employee/intervals';
+ static const String DAY_CALENDAR_SHIFTS_URI = '/api/v1/customer/shifts/day-shifts';
+
+ /// exchanges
+ static const String EXCHANGE_REQUESTS_URI = '/api/v1/customer/exchange/exchange-requests';
+ static const String EXCHANGE_REQUEST_STATUS_URI = '/api/v1/customer/exchange/update-status';
+ static const String RECEIVED_EXCHANGE_REQUESTS_URI = '/api/v1/customer/exchange/received-exchange-requests';
+ static const String SHIFT_EXCHANGE_URI = '/api/v1/customer/exchange/shift-exchange';
+
+ /// vacations
+ static const String VACATIONS_LIST_URI = '/api/v1/customer/vacation/vacation-list';
+ static const String ADD_VACATION_URI = '/api/v1/customer/vacation/add-vacation';
+ static const String UPDATE_VACATION_URI = '/api/v1/customer/vacation/update-vacation';
+ static const String REMOVE_VACATION_URI = '/api/v1/customer/vacation/remove-vacation';
+ static const String REMOVE_VACATION_FROM_CALENDAR_URI = '/api/v1/customer/vacation/remove-vacation-calendar';
 
  //PROFILE
  static const String UPDATE_PERSONAL_INFO_URI = '/api/v1/customer/profile/personal-info';
@@ -46,14 +69,15 @@ class AppConstants {
 
 
  //CONVERSATIONS
- static const String MESSAGE_URI = '/api/v1/customer/conversation/get';
+ static const String MESSAGE_URI = '/api/v1/customer/conversation/get-messages';
  static const String MESSAGE_HISTORY_URI = '/api/v1/customer/conversation/messages-history';
  static const String SEND_MESSAGE_URI = '/api/v1/customer/conversation/send';
  static const String SEND_IMAGE_URI = '/api/v1/customer/conversation/send-image';
 
- //MESSAGES
- static const String MESSAGES_URI = '/api/v1/customer/message/get';
 
+ //Main MESSAGES
+ static const String MAIN_MESSAGES_URI = '/api/v1/customer/conversation/main-messages';
+ static const String CHAT_USERS_LIST_URI = '/api/v1/customer/conversation/users-list';
 
  static const String CUSTOMER_INFO_URI = '/api/v1/customer/info';
  static const String EMPLOYEE_ROLES_URI = '/api/v1/employee/roles';
@@ -69,7 +93,7 @@ class AppConstants {
  static const String COUNTRY_CODE = 'country_code';
  static const String LANGUAGE_CODE = 'language_code';
 
- static const String CURRENCY = '\$';
+ static const String CURRENCY = '€';
 
  static const String THEME = 'theme';
  static const String PRIMARY_COLOR = 'primary_color';

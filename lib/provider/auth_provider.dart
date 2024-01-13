@@ -112,6 +112,7 @@ class AuthProvider extends ChangeNotifier {
     ApiResponse apiResponse = await authRepo!.getEmployeeRoles();
     if(apiResponse.response != null){
       if (apiResponse.response!.statusCode == 200) {
+        _employeeRoles = [];
         apiResponse.response!.data.forEach((model) {
           _employeeRoles.add(EmployeeRoleModel.fromJson(model));
         });

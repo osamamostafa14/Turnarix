@@ -4,10 +4,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:turnarix/provider/auth_provider.dart';
 import 'package:turnarix/provider/calendar_provider.dart';
 import 'package:turnarix/provider/profile_provider.dart';
+import 'package:turnarix/provider/shifts_provider.dart';
 import 'package:turnarix/provider/splash_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:turnarix/provider/vacation_provider.dart';
 import 'package:turnarix/utill/images.dart';
 import 'package:turnarix/view/screens/auth/login_screen.dart';
 import 'package:turnarix/view/screens/dashboard/dashboard_screen.dart';
@@ -62,13 +64,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       Provider.of<CalendarProvider>(context, listen: false).getFirstDayNameOfMonth(DateTime.now());
-      Provider.of<CalendarProvider>(context, listen: false).getDateInfo(DateTime.now());
+
       Provider.of<CalendarProvider>(context, listen: false).initCalendar();
+      Provider.of<CalendarProvider>(context, listen: false).getDateInfo(DateTime.now());
       Provider.of<SplashProvider>(context, listen: false).initConfig(_globalKey, context).then((bool isSuccess) async {
         if (isSuccess) {
-
           Provider.of<AuthProvider>(context, listen: false).checkLoggedIn().then((value) async {
             if(Provider.of<AuthProvider>(context, listen: false).isLoggedIn){
+              Provider.of<CalendarProvider>(context, listen: false).getCalendarShifts(context);
+              Provider.of<CalendarProvider>(context, listen: false).getShiftIntervals(context);
+              Provider.of<ShiftsProvider>(context, listen: false).getShiftslist(context);
+              Provider.of<VacationProvider>(context, listen: false).getVacationsList(context, '1');
               ResponseModel _response = await Provider.of<ProfileProvider>(context, listen: false).getUserInfo(context);
               if(_response.isSuccess){
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context)=>
@@ -76,12 +82,10 @@ class _SplashScreenState extends State<SplashScreen> {
               }else{
                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=> LoginScreen()));
               }
-
             }else {
               Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=> LoginScreen()));
             }
           });
-
         }
       });
     } catch(e) {

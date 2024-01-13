@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:turnarix/utill/color_resources.dart';
 
 class BorderButton extends StatelessWidget {
   final VoidCallback ? onTap;
@@ -20,7 +21,7 @@ class BorderButton extends StatelessWidget {
         height: height==null? 40 : height,
         width: width==null? 80 : width,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: ColorResources.BG_SECONDRY,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(width: 1, color: borderColor!),
         ),

@@ -19,4 +19,12 @@ class ProfileRepo {
     }
   }
 
+  Future<ApiResponse> getEmployeeRoles() async {
+    try {
+      final response = await dioClient!.get(AppConstants.EMPLOYEE_ROLES_URI);
+      return ApiResponse.withSuccess(response);
+    } catch (e) {
+      return ApiResponse.withError(ApiErrorHandler.getMessage(e));
+    }
+  }
 }

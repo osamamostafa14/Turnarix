@@ -24,7 +24,9 @@ class ColorResources {
   }
   static const Color BG_PRIMARY = Colors.white;
   static const Color BG_DARK_GREY = Color(0xFF262626);
-  static const Color BG_SECONDRY= Color(0xFF6252da);
+  static const Color BG_SECONDRY= Color(0xFF1f232f);
+  static const Color DARK_BLUE= Color(0xFF2f3444);
+  static const Color BG_YELLOW= Color(0xFFffdf9b);
   static const Color BG_GREY = Color(0xFF2c2c2c);
  // static const Color DARK_GREY = Color(0xFF262626);
   static const Color OFF_WHITE = Color(0xFFf5f5f5);
@@ -44,14 +46,14 @@ class ColorResources {
   static const Color COLOR_NIGHER_RIDER = Color(0xff303030);
   static const Color BACKGROUND_COLOR = Color(0xfffafafa);
   static const Color COLOR_GREY_BUNKER = Color(0xff25282B);
-  static const Color COLOR_GREY_CHATEAU = Color(0xffA0A4A8);
-  static const Color BORDER_COLOR = Color(0xFFDCDCDC);
+  static const Color COLOR_GREY_CHATEAU = Color(0xff3d3d3d);
+  static const Color BORDER_COLOR = Color(0xFF60979a);
   static const Color DISABLE_COLOR = Color(0xFF979797);
   static const Color COLOR_BACKGROUND = Color(0xFFd9eaeb);
   static final Color inviteFriendBgColor = Color(0xFF0D084D);
   static final Color COLOR_PINK = Color(0xFFfd5ca8);
-  static final Color LETSCHAT_COLOR = Color(0xFF0D084D);
-  static final Color newColorCode = Color(0xFF1DBF73);
+  static final Color ULTRA_DARK_BLUE_COLOR = Color(0xFF1a1c23);
+  static final Color BACK_BUTTON = Color(0xFF4a4e59);
 
   static final Color gradientColor1 = Color(0xFFB12704);
   static final Color gradientColor2 = Color(0xFFF75463);

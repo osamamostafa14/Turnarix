@@ -1,122 +1,38 @@
+import 'dart:core';
 import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:turnarix/data/helper/date_converter.dart';
+import 'package:turnarix/data/model/shifts/intervals_model.dart';
+import 'package:turnarix/provider/saved_shift_provider.dart';
 import 'package:turnarix/provider/shifts_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:turnarix/utill/color_resources.dart';
 import 'package:turnarix/view/base/custom_button.dart';
 
 class ServiceTimesWidget extends StatelessWidget {
-  final Map<String, dynamic>? interval;
-  ServiceTimesWidget({this.interval});
+  final IntervalModel? interval;
+   bool? fromEmployee;
+  ServiceTimesWidget({this.interval, this.fromEmployee = false});
 
   @override
   Widget build(BuildContext context) {
 
     return
-      Consumer<ShiftsProvider>(
-        builder: (context, shiftsProvider, child) {
-          TimeOfDay serviceStartTime = shiftsProvider.temporaryServiceStartTime;
-          TimeOfDay serviceEndTime = shiftsProvider.temporaryServiceEndTime;
+      Consumer<SavedShiftProvider>(
+        builder: (context, shiftProvider, child) {
 
-          String formattedServiceStartTime = DateFormat('h:mm a').format(
-            DateTime(2023, 1, 1, serviceStartTime.hour, serviceStartTime.minute),
-          );
+          List<IntervalServiceModel> _servicesList = [];
 
-          String formattedServiceEndTime = DateFormat('h:mm a').format(
-            DateTime(2023, 1, 1, serviceEndTime.hour, serviceEndTime.minute),
-          );
 
-          List<Map<String, dynamic>> _extraServicesList = [];
-          try {
-            _extraServicesList = shiftsProvider.extraServiceTimeList
-                .where((item) => item['interval_unique_id'] == interval!['unique_id'])
-                .toList(); // i want to order this list with item['id']
-
-            // Continue with the code to use _translation here
-          } catch (e) {
-            _extraServicesList = [];
-            print("Empty Service List");
+          if(fromEmployee == true){
+            _servicesList = interval!.services!;
+          }else{
+            _servicesList = shiftProvider.selectedServiceTimeList;
           }
 
           return Column(
             children: [
-              Container(
-                height: 80,
-                decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                    color: Theme.of(context).primaryColor.withOpacity(0.3)
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    InkWell(
-                      onTap: () async {
-                        TimeOfDay _selectedTime = shiftsProvider.temporaryServiceStartTime;
-
-                        TimeOfDay? picked = await showTimePicker(
-                          context: context,
-                          initialTime: _selectedTime,
-                          builder: (BuildContext context, Widget? child) {
-                            return MediaQuery(
-                              data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-                              child: child!,
-                            );
-                          },
-                        );
-                        if (picked != null && picked != _selectedTime) {
-                          shiftsProvider.setServiceStartTime(picked);
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 8),
-                          Text('Inizio servicio', style:
-                          TextStyle(color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 15)),
-                          Spacer(),
-                          Text('${formattedServiceStartTime}', style:
-                          TextStyle(color: Colors.black54, fontWeight: FontWeight.w500, fontSize: 15)),
-                          const SizedBox(width: 12),
-                        ],
-                      ),
-                    ),
-
-                    Divider(),
-
-                    InkWell(
-                      onTap: () async {
-                        TimeOfDay _selectedTime = shiftsProvider.temporaryServiceEndTime;
-
-                        TimeOfDay? picked = await showTimePicker(
-                          context: context,
-                          initialTime: _selectedTime,
-                          builder: (BuildContext context, Widget? child) {
-                            return MediaQuery(
-                              data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-                              child: child!,
-                            );
-                          },
-                        );
-                        if (picked != null && picked != _selectedTime) {
-                          shiftsProvider.setServiceEndTime(picked);
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 8),
-                          Text('Fine servicio', style:
-                          TextStyle(color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 15)),
-                          Spacer(),
-                          Text('${formattedServiceEndTime}', style:
-                          TextStyle(color: Colors.black54, fontWeight: FontWeight.w500, fontSize: 15)),
-                          const SizedBox(width: 12),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height:  shiftsProvider.temporaryServiceOn? 10 : 0),
 
               const SizedBox(height: 10),
 
@@ -124,19 +40,23 @@ class ServiceTimesWidget extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 // padding: const EdgeInsets.all(0),
-                itemCount: _extraServicesList.length,
-
+                itemCount: _servicesList.length,
                 itemBuilder: (context, index) {
+                  IntervalServiceModel _service = _servicesList[index];
 
-                  TimeOfDay _startTime = _extraServicesList[index]['start_time'];
-                  TimeOfDay _endTime = _extraServicesList[index]['end_time'];
+                  DateTime startTimeDate = DateTime.parse(_service.startService!);
+                  print('parsed ${startTimeDate}');
+                  TimeOfDay startTime = TimeOfDay(hour: startTimeDate.hour, minute: startTimeDate.minute);
 
+                  DateTime endTimeDate = DateTime.parse(_service.endService!);
+                  TimeOfDay sendTime = TimeOfDay(hour: endTimeDate.hour, minute: endTimeDate.minute);
+                  
                   String formattedStartTime = DateFormat('h:mm a').format(
-                    DateTime(2023, 1, 1, _startTime.hour, _startTime.minute),
+                    DateTime(2023, 1, 1, startTimeDate.hour, startTimeDate.minute),
                   );
 
                   String formattedEndTime = DateFormat('h:mm a').format(
-                    DateTime(2023, 1, 1, _endTime.hour, _endTime.minute),
+                    DateTime(2023, 1, 1, endTimeDate.hour, endTimeDate.minute),
                   );
 
                   return Padding(
@@ -146,10 +66,13 @@ class ServiceTimesWidget extends StatelessWidget {
                         Row(
                           children: [
                             Text('Servizio aggiuntivo ${index + 1}', style: TextStyle(
-                                color: Colors.black87,
+                                color: Colors.white,
                                 fontSize: 15
                             )),
+
                             const SizedBox(width: 15),
+
+                            fromEmployee == true? const SizedBox():
                             InkWell(
                               onTap: () {
                                 showDialog(
@@ -172,9 +95,8 @@ class ServiceTimesWidget extends StatelessWidget {
                                           Expanded(
                                             child: CustomButton(btnTxt: 'Yes',
                                                 onTap: (){
-                                                  print('intervalUniqueId 1: ${interval!['unique_id']}');
                                                   Navigator.pop(context);
-                                                  shiftsProvider.removeExtraService(index, _extraServicesList[index]['unique_id']);
+                                                shiftProvider.removeServiceTime(_service.id!);
                                                 }),
                                           ),
                                           const SizedBox(width: 14),
@@ -201,45 +123,40 @@ class ServiceTimesWidget extends StatelessWidget {
                           height: 80,
                           decoration: BoxDecoration(
                               borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                              color: Theme.of(context).primaryColor.withOpacity(0.3)
+                              color: Theme.of(context).primaryColor.withOpacity(0.3),
+                            border: Border.all(width: 1, color: ColorResources.BORDER_COLOR),
                           ),
                           child: Column(
                             children: [
                               const SizedBox(height: 10),
                               InkWell(
                                 onTap: () async {
-                                  TimeOfDay _selectedTime = _startTime;
+                                  if(fromEmployee == false){
+                                    TimeOfDay _selectedTime = TimeOfDay(hour: startTimeDate.hour, minute: startTimeDate.minute);
 
-                                  TimeOfDay? picked = await showTimePicker(
-                                    context: context,
-                                    initialTime: _selectedTime,
-                                    builder: (BuildContext context, Widget? child) {
-                                      return MediaQuery(
-                                        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-                                        child: child!,
-                                      );
-                                    },
-                                  );
-                                  if (picked != null && picked != _selectedTime) {
-                                    shiftsProvider.updateExtraServiceTime(
-                                      index,
-                                      {
-                                        'unique_id': _extraServicesList[index]['unique_id'],
-                                        'start_time': picked,
-                                        'end_time': _endTime,
-                                        'interval_unique_id': interval!['unique_id']
+                                    TimeOfDay? picked = await showTimePicker(
+                                      context: context,
+                                      initialTime: _selectedTime,
+                                      builder: (BuildContext context, Widget? child) {
+                                        return MediaQuery(
+                                          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                                          child: child!,
+                                        );
                                       },
                                     );
+                                    if (picked != null && picked != _selectedTime) {
+                                      shiftProvider.updateServiceTime(_service.id!, picked, 'start');
+                                    }
                                   }
                                 },
                                 child: Row(
                                   children: [
                                     const SizedBox(width: 8),
                                     Text('Inizio servicio', style:
-                                    TextStyle(color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 15)),
+                                    TextStyle(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 15)),
                                     Spacer(),
                                     Text('${formattedStartTime}', style:
-                                    TextStyle(color: Colors.black54, fontWeight: FontWeight.w500, fontSize: 15)),
+                                    TextStyle(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 15)),
                                     const SizedBox(width: 12),
                                   ],
                                 ),
@@ -249,38 +166,33 @@ class ServiceTimesWidget extends StatelessWidget {
 
                               InkWell(
                                 onTap: () async {
-                                  TimeOfDay _selectedTime = _endTime;
+                                  if(fromEmployee == false){
+                                    TimeOfDay _selectedTime = TimeOfDay(hour: endTimeDate.hour, minute: endTimeDate.minute);
 
-                                  TimeOfDay? picked = await showTimePicker(
-                                    context: context,
-                                    initialTime: _selectedTime,
-                                    builder: (BuildContext context, Widget? child) {
-                                      return MediaQuery(
-                                        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-                                        child: child!,
-                                      );
-                                    },
-                                  );
-                                  if (picked != null && picked != _selectedTime) {
-                                    shiftsProvider.updateExtraServiceTime(
-                                      index,
-                                      {
-                                        'unique_id': _extraServicesList[index]['unique_id'],
-                                        'start_time': _startTime,
-                                        'end_time': picked,
-                                        'interval_unique_id': interval!['unique_id']
+                                    TimeOfDay? picked = await showTimePicker(
+                                      context: context,
+                                      initialTime: _selectedTime,
+                                      builder: (BuildContext context, Widget? child) {
+                                        return MediaQuery(
+                                          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                                          child: child!,
+                                        );
                                       },
                                     );
+                                    if (picked != null && picked != _selectedTime) {
+                                      shiftProvider.updateServiceTime(_service.id!, picked, 'end');
+                                    }
                                   }
+
                                 },
                                 child: Row(
                                   children: [
                                     const SizedBox(width: 8),
                                     Text('Fine servicio', style:
-                                    TextStyle(color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 15)),
+                                    TextStyle(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 15)),
                                     Spacer(),
                                     Text('${formattedEndTime}', style:
-                                    TextStyle(color: Colors.black54, fontWeight: FontWeight.w500, fontSize: 15)),
+                                    TextStyle(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 15)),
                                     const SizedBox(width: 12),
                                   ],
                                 ),
@@ -294,32 +206,35 @@ class ServiceTimesWidget extends StatelessWidget {
                 },
               ),
 
+              fromEmployee == true? const SizedBox():
               InkWell(
                 onTap: () {
+                  DateTime now = DateTime.now();
+                  DateTime startTime = DateTime(now.year, now.month, now.day, 9, 0);
+                  DateTime endTime = DateTime(now.year, now.month, now.day, 17, 0);
                   final Random random = Random();
-                  shiftsProvider.addExtraServiceTime(
-                      {
-                        'unique_id': '${DateTime.now().hour.toString()}' '${DateTime.now().minute.toString()}.' '${random.nextInt(10000) + 1}',
-                        'start_time': TimeOfDay(hour: 9, minute: 0),
-                        'end_time': TimeOfDay(hour: 17, minute: 0),
-                        'interval_unique_id': interval!['unique_id'],
-                      }
+                  shiftProvider.addIntervalServiceTime(
+                      IntervalServiceModel(
+                        id: random.nextInt(10000) + 1,  // Temporary Id
+                        intervalId: interval!.id,
+                        startService: startTime.toString(),
+                        endService: endTime.toString()
+                      )
                   );
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text('Altro servizio', style: TextStyle(color: Colors.black54, fontSize: 15)),
+                    Text('Altro servizio', style: TextStyle(color: Colors.white70, fontSize: 15)),
 
                     const SizedBox(width: 5),
 
-                    Icon(Icons.add, color: Colors.black54),
+                    Icon(Icons.add, color: Colors.white70),
                   ],
                 ),
               ),
             ],
           );
         });
-
   }
 }

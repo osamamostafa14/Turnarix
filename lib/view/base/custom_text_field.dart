@@ -29,6 +29,7 @@ class CustomTextField extends StatefulWidget {
   final bool? dontEdit;
   final int? maxLength;
   final double? height;
+   Color? inputColor = Colors.white;
 
   CustomTextField(
       {this.hintText = 'Write something...',
@@ -57,6 +58,7 @@ class CustomTextField extends StatefulWidget {
       this.dontEdit = false,
       this.maxLength,
         this.height,
+        this.inputColor,
    });
 
   @override
@@ -75,7 +77,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       controller: widget.controller,
       focusNode: widget.focusNode,
       style: Theme.of(context).textTheme.headline2!.copyWith(
-          color: Theme.of(context).textTheme.headline2!.color,
+          color: widget.inputColor!=null?widget.inputColor: Colors.black54,
           fontSize: 14),
       textInputAction: widget.inputAction,
       keyboardType: widget.inputType,
@@ -91,19 +93,20 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ]
           : null,
       decoration: InputDecoration(
+
         counterText: '',
         contentPadding:  EdgeInsets.symmetric(vertical: widget.height!=null? widget.height! : 19, horizontal: 22),
         enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
             borderSide: BorderSide(
-              color: Theme.of(context).backgroundColor,
+              color:  Theme.of(context).primaryColor,
               width: 1.0,
             )),
 
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
           borderSide: BorderSide(
-            color: Theme.of(context).backgroundColor, // Set the desired color when focused
+            color: ColorResources.BG_YELLOW, // Set the desired color when focused
             width: 1.0,
           ),
         ),
@@ -122,7 +125,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 padding: const EdgeInsets.only(
                     left: 12,
                     right: 15),
-                child: Image.asset(widget.prefixIconUrl!, height: 24, color: Theme.of(context).textTheme.headline2!.color),
+                child: Image.asset(widget.prefixIconUrl!, height: 24,
+                  color: widget.inputColor!=null?widget.inputColor: Colors.black54),
               )
             : SizedBox.shrink(),
         prefixIconConstraints: BoxConstraints(minWidth: 23, maxHeight: 24),

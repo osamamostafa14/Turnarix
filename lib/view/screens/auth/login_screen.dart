@@ -11,6 +11,7 @@ import 'package:turnarix/view/base/custom_text_field.dart';
 import 'package:turnarix/view/screens/auth/check_email_screen.dart';
 import 'package:turnarix/view/screens/auth/signup_check_email.dart';
 import 'package:turnarix/view/screens/dashboard/dashboard_screen.dart';
+import 'package:turnarix/provider/calendar_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -199,6 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           authProvider.login(_email, _password).then((status) async {
                                             if (status.isSuccess) {
                                               Provider.of<ProfileProvider>(context, listen: false).getUserInfo(context).then((value) {
+                                                Provider.of<CalendarProvider>(context, listen: false).getCalendarShifts(context);
                                                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext? context)=> DashboardScreen(pageIndex: 0)));
                                               });
 

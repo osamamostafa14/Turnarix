@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turnarix/data/model/response/base/api_response.dart';
 import 'package:turnarix/data/model/response/base/error_response.dart';
+import 'package:turnarix/data/model/response/employee_role_model.dart';
 import 'package:turnarix/data/model/response/response_model.dart';
 import 'package:turnarix/data/model/response/signup_model.dart';
 import 'package:turnarix/data/model/response/user_info_model.dart';
@@ -48,7 +49,6 @@ class ProfileProvider with ChangeNotifier {
   }
 
   Future<ResponseModel> getUserInfo(BuildContext? context) async {
-
     ResponseModel _responseModel;
     ApiResponse apiResponse = await profileRepo!.getUserInfo();
     if(apiResponse.response != null){
@@ -57,7 +57,6 @@ class ProfileProvider with ChangeNotifier {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setInt('my_defined_user_id', _userInfoModel!.id!);
         _responseModel = ResponseModel(true, 'successful');
-
       } else {
         notifyListeners();
         String _errorMessage;
@@ -113,9 +112,10 @@ class ProfileProvider with ChangeNotifier {
       _fields.addAll(<String, String>{
         '_method': 'post',
         'name' : signUpdModel.name!,
-        'email' : signUpdModel.email!,
+        'surname' : signUpdModel.surname!,
         'phone' : signUpdModel.phone!,
-        'address' : signUpdModel.address!,
+        'role_id' : signUpdModel.roleId.toString(),
+        'role_name' : signUpdModel.roleName.toString(),
         'password' : signUpdModel.password!.toString(),
       });
     }
@@ -125,4 +125,57 @@ class ProfileProvider with ChangeNotifier {
     return response;
   }
 
+
+  List<EmployeeRoleModel> _employeeRoles = [];
+  List<EmployeeRoleModel> get employeeRoles => _employeeRoles;
+
+  String _roleName = 'Selezionare';
+  String get roleName => _roleName;
+
+  int? _roleId;
+  int? get roleId => _roleId;
+
+  Future<ResponseModel> getEmployeeRoles(BuildContext? context) async {
+    ResponseModel _responseModel;
+    ApiResponse apiResponse = await profileRepo!.getEmployeeRoles();
+    if(apiResponse.response != null){
+      if (apiResponse.response!.statusCode == 200) {
+        _employeeRoles = [];
+        apiResponse.response!.data.forEach((model) {
+          _employeeRoles.add(EmployeeRoleModel.fromJson(model));
+        });
+        _responseModel = ResponseModel(true, 'successful');
+
+      } else {
+        notifyListeners();
+        String _errorMessage;
+        if (apiResponse.error is String) {
+          _errorMessage = apiResponse.error.toString();
+        } else {
+          _errorMessage = apiResponse.error.errors[0].message;
+        }
+        print(_errorMessage);
+        _responseModel = ResponseModel(false, _errorMessage);
+        // ApiChecker.checkApi(context, apiResponse);
+      }
+    }else{
+      String _errorMessage;
+      if (apiResponse.error is String) {
+        _errorMessage = apiResponse.error.toString();
+      } else {
+        _errorMessage = apiResponse.error.errors[0].message;
+      }
+      print(_errorMessage);
+      _responseModel = ResponseModel(false, _errorMessage);
+    }
+
+    notifyListeners();
+    return _responseModel;
+  }
+
+  void setRole(String roleName, int roleId){
+    _roleName = roleName;
+    _roleId = roleId;
+    notifyListeners();
+  }
 }

@@ -3,27 +3,27 @@ class ServiceAllowanceModel {
   String? _name;
   String? _amount;
   bool? _status;
-  String? _uniqueId;
+  int? _intervalId;
 
   ServiceAllowanceModel(
       {int? id,
         String? name,
         String? amount,
         bool? status,
-        String? uniqueId,
+        int? intervalId,
       }) {
     this._id = id;
     this._name = name;
     this._amount = amount;
     this._status = status;
-    this._uniqueId = uniqueId;
+    this._intervalId = intervalId;
   }
 
   int? get id => _id;
   String? get name => _name;
   String? get amount => _amount;
   bool? get status => _status;
-  String? get uniqueId => _uniqueId;
+  int? get intervalId => _intervalId;
 
   set status(bool? value) {
     _status = value;
@@ -36,16 +36,18 @@ class ServiceAllowanceModel {
   ServiceAllowanceModel.fromJson(Map<String, dynamic> json) {
     _id = json['id'];
     _name = json['name'];
-    _amount = json['amount'];
-    _status = json['status'];
-    _uniqueId = json['unique_id'];
+    _amount = json['amount'].toString();
+    _status = json['status'] == 1? true: false;
+    _intervalId = json['interval_id'];
   }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {
       'id': _id,
       'name': _name,
       'amount': _amount,
-      'unique_id': _uniqueId,
+      'status': _status,
+      'interval_id': _intervalId,
     };
     return data;
   }

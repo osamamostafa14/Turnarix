@@ -63,6 +63,7 @@ dependencies:
   syncfusion_flutter_datepicker: ^23.1.40
   scrollable_positioned_list: ^0.3.8
   flutter_colorpicker: ^1.0.3
+  flutter_smart_dialog: ^4.9.5+1
 
 
 dev_dependencies:

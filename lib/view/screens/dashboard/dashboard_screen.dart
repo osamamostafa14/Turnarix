@@ -2,9 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:turnarix/provider/auth_provider.dart';
+import 'package:turnarix/provider/chat_provider.dart';
+import 'package:turnarix/utill/color_resources.dart';
 import 'package:turnarix/view/screens/calendar/calendar_screen.dart';
+import 'package:turnarix/view/screens/chat/chat_home_screen.dart';
 import 'package:turnarix/view/screens/home/home_screen.dart';
 import 'package:turnarix/view/screens/menu/menu_screen.dart';
+import 'package:turnarix/view/screens/profile/personal_info_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final int? pageIndex;
@@ -31,7 +35,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     _screens = [
       CalendarScreen(),
-      MenuScreen(),
+      ChatHomeScreen(),
+      PersonalInfoScreen(),
       MenuScreen()
     ];
   }
@@ -90,7 +95,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return BottomNavigationBarItem(
       icon: Stack(
         clipBehavior: Clip.none, children: [
-        Icon(icon, color: index == _pageIndex ? Theme.of(context).primaryColor : Theme.of(context).textTheme.headline2!.color!.withOpacity(0.6),
+        Icon(icon, color: index == _pageIndex ?
+        ColorResources.BG_SECONDRY : Theme.of(context).textTheme.headline2!.color!.withOpacity(0.6),
             size: 30),
       ],
       ),
@@ -102,11 +108,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _pageController!.jumpToPage(pageIndex);
       _pageIndex = pageIndex;
-      final bool _isLoggedIn = Provider.of<AuthProvider>(context, listen: false).isLoggedIn;
        if (_pageIndex == 1) {
-         if(_isLoggedIn){
-
-         }
+         Provider.of<ChatProvider>(context, listen: false).clearOffset();
+         Provider.of<ChatProvider>(context, listen: false).getMainMessagesList(context, '1');
+         Provider.of<ChatProvider>(context, listen: false).getUsersList(context, '1');
       }
     });
   }

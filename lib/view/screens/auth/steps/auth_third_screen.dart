@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:turnarix/data/model/response/signup_model.dart';
 import 'package:turnarix/provider/auth_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:turnarix/provider/calendar_provider.dart';
 import 'package:turnarix/provider/profile_provider.dart';
 import 'package:turnarix/utill/dimensions.dart';
 import 'package:turnarix/utill/images.dart';
@@ -11,7 +12,6 @@ import 'package:turnarix/view/base/custom_button.dart';
 import 'package:turnarix/view/base/custom_snackbar.dart';
 import 'package:turnarix/view/base/custom_text_field.dart';
 import 'package:turnarix/view/screens/auth/login_screen.dart';
-import 'package:turnarix/view/screens/auth/steps/auth_second_screen.dart';
 import 'package:turnarix/view/screens/dashboard/dashboard_screen.dart';
 
 class AuthThirdScreen extends StatefulWidget {
@@ -221,6 +221,7 @@ class _AuthThirdScreenState extends State<AuthThirdScreen> {
                                           authProvider.registration(signUpModel).then((status) async {
                                             if (status.isSuccess) {
                                               Provider.of<ProfileProvider>(context, listen: false).getUserInfo(context).then((value) {
+                                                Provider.of<CalendarProvider>(context, listen: false).getCalendarShifts(context);
                                                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext? context)=>
                                                     DashboardScreen(pageIndex: 0)));
                                               });

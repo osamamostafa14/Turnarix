@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:turnarix/provider/auth_provider.dart';
+import 'package:turnarix/provider/calendar_provider.dart';
 import 'package:turnarix/provider/profile_provider.dart';
-import 'package:turnarix/utill/color_resources.dart';
 import 'package:turnarix/utill/dimensions.dart';
-import 'package:turnarix/utill/images.dart';
-import 'package:turnarix/view/base/custom_app_bar.dart';
 import 'package:turnarix/view/base/custom_button.dart';
 import 'package:turnarix/view/base/custom_snackbar.dart';
 import 'package:turnarix/view/base/custom_text_field.dart';
 import 'package:turnarix/view/screens/dashboard/dashboard_screen.dart';
-import 'package:turnarix/view/screens/home/home_screen.dart';
 
 class CreateNewPasswordScreen extends StatelessWidget {
   final String? email;
@@ -118,6 +115,7 @@ class CreateNewPasswordScreen extends StatelessWidget {
                                     if(value.isSuccess) {
                                       auth.login(email!, _passwordController.text).then((value) async {
                                         Provider.of<ProfileProvider>(context, listen: false).getUserInfo(context).then((value) {
+                                          Provider.of<CalendarProvider>(context, listen: false).getCalendarShifts(context);
                                           Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext? context)=> DashboardScreen(pageIndex: 0)));
                                         });
                                       });

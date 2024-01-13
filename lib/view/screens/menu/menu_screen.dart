@@ -21,7 +21,7 @@ class MenuScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: ColorResources.BG_SECONDRY,
       body:
       Column(children: [
         Consumer<ProfileProvider>(
@@ -34,7 +34,7 @@ class MenuScreen extends StatelessWidget {
               Center(
             child: Container(
               width: 1170,
-              decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor),
+              decoration: BoxDecoration(color: ColorResources.BG_SECONDRY),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const SizedBox(height: 100),
               Container(
@@ -65,7 +65,7 @@ class MenuScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   _isLoggedIn ? profileProvider.userInfoModel != null ? Text(
                     '${profileProvider.userInfoModel!.email ?? ''}',
-                    style: Theme.of(context).textTheme.bodyText1!.copyWith(color: Theme.of(context).textTheme.headline2!.color,
+                    style: Theme.of(context).textTheme.bodyText1!.copyWith(color:Colors.white70,
                       fontWeight: FontWeight.normal
                     ),
                   ) : Container(height: 15, width: 100, color: Colors.white) : Text(

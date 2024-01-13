@@ -1,33 +1,32 @@
 import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:turnarix/data/model/shifts/intervals_model.dart';
+import 'package:turnarix/provider/saved_shift_provider.dart';
 import 'package:turnarix/provider/shifts_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:turnarix/utill/color_resources.dart';
 import 'package:turnarix/view/base/custom_button.dart';
 
 class BreakTimesWidget extends StatelessWidget {
-  final Map<String, dynamic>? interval;
-  BreakTimesWidget({this.interval});
+  final IntervalModel? interval;
+  bool? fromEmployee;
+  BreakTimesWidget({this.interval, this.fromEmployee = false});
 
   @override
   Widget build(BuildContext context) {
 
     return
-      Consumer<ShiftsProvider>(
+      Consumer<SavedShiftProvider>(
           builder: (context, shiftsProvider, child) {
 
-            List<Map<String, dynamic>> _breakList = [];
-            try {
-              _breakList = shiftsProvider.breakList
-                  .where((item) => item['interval_unique_id'] == interval!['unique_id'])
-                  .toList(); // i want to order this list with item['id']
+            List<IntervalBreakModel> _breakList = [];
 
-              // Continue with the code to use _translation here
-            } catch (e) {
-              _breakList = [];
-              print("Empty List");
+            if(fromEmployee == true){
+              _breakList = interval!.breaks!;
+            }else{
+              _breakList = shiftsProvider.selectedBreakList;
             }
-
             return Column(
               children: [
 
@@ -38,19 +37,23 @@ class BreakTimesWidget extends StatelessWidget {
                   shrinkWrap: true,
                   // padding: const EdgeInsets.all(0),
                   itemCount: _breakList.length,
-
                   itemBuilder: (context, index) {
+                    IntervalBreakModel _break = _breakList[index];
 
-                    TimeOfDay _startTime = _breakList[index]['start_time'];
-                    TimeOfDay _endTime = _breakList[index]['end_time'];
+                    DateTime startTimeDate = DateTime.parse(_break.startTime!);
+                    TimeOfDay startTime = TimeOfDay(hour: startTimeDate.hour, minute: startTimeDate.minute);
+
+                    DateTime endTimeDate = DateTime.parse(_break.endTime!);
+                    TimeOfDay sendTime = TimeOfDay(hour: endTimeDate.hour, minute: endTimeDate.minute);
 
                     String formattedStartTime = DateFormat('h:mm a').format(
-                      DateTime(2023, 1, 1, _startTime.hour, _startTime.minute),
+                      DateTime(2023, 1, 1, startTimeDate.hour, startTimeDate.minute),
                     );
 
                     String formattedEndTime = DateFormat('h:mm a').format(
-                      DateTime(2023, 1, 1, _endTime.hour, _endTime.minute),
+                      DateTime(2023, 1, 1, endTimeDate.hour, endTimeDate.minute),
                     );
+
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -59,10 +62,12 @@ class BreakTimesWidget extends StatelessWidget {
                           Row(
                             children: [
                               Text('Aggiungi pausa ${index + 1}', style: TextStyle(
-                                  color: Colors.black87,
+                                  color: Colors.white70,
                                   fontSize: 15
                               )),
                               const SizedBox(width: 15),
+
+                              fromEmployee == true? const SizedBox():
                               InkWell(
                                 onTap: () {
                                   showDialog(
@@ -85,9 +90,9 @@ class BreakTimesWidget extends StatelessWidget {
                                             Expanded(
                                               child: CustomButton(btnTxt: 'SÌ',
                                                   onTap: (){
-                                                    print('intervalUniqueId 1: ${interval!['unique_id']}');
+
                                                     Navigator.pop(context);
-                                                    shiftsProvider.removeBreak(index, _breakList[index]['unique_id']);
+                                                    shiftsProvider.removeBreak(_break.id!);
                                                   }),
                                             ),
                                             const SizedBox(width: 14),
@@ -114,86 +119,79 @@ class BreakTimesWidget extends StatelessWidget {
                             height: 80,
                             decoration: BoxDecoration(
                                 borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                                color: Theme.of(context).primaryColor.withOpacity(0.3)
+                                color: Theme.of(context).primaryColor.withOpacity(0.3),
+                              border: Border.all(width: 1, color: ColorResources.BORDER_COLOR),
                             ),
                             child: Column(
                               children: [
                                 const SizedBox(height: 10),
                                 InkWell(
                                   onTap: () async {
-                                    TimeOfDay _selectedTime = _startTime;
+                                    if(fromEmployee == false) {
+                                      TimeOfDay _selectedTime = TimeOfDay(
+                                          hour: startTimeDate.hour, minute: startTimeDate.minute);
 
-                                    TimeOfDay? picked = await showTimePicker(
-                                      context: context,
-                                      initialTime: _selectedTime,
-                                      builder: (BuildContext context, Widget? child) {
-                                        return MediaQuery(
-                                          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-                                          child: child!,
-                                        );
-                                      },
-                                    );
-                                    if (picked != null && picked != _selectedTime) {
-                                      shiftsProvider.updateBreak(
-                                        index,
-                                        {
-                                          'unique_id': _breakList[index]['unique_id'],
-                                          'start_time': picked,
-                                          'end_time': _endTime,
-                                          'interval_unique_id': interval!['unique_id']
+                                      TimeOfDay? picked = await showTimePicker(
+                                        context: context,
+                                        initialTime: _selectedTime,
+                                        builder: (BuildContext context, Widget? child) {
+                                          return MediaQuery(
+                                            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                                            child: child!,
+                                          );
                                         },
                                       );
+                                      if (picked != null && picked != _selectedTime) {
+                                        shiftsProvider.updateBreak(
+                                            _break.id!, picked, 'start'
+                                        );
+                                      }
                                     }
                                   },
                                   child: Row(
                                     children: [
                                       const SizedBox(width: 8),
-                                      Text('Pausa', style:
-                                      TextStyle(color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 15)),
+                                      Text('Inizio della pausa', style:
+                                      TextStyle(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 15)),
                                       Spacer(),
                                       Text('${formattedStartTime}', style:
-                                      TextStyle(color: Colors.black54, fontWeight: FontWeight.w500, fontSize: 15)),
+                                      TextStyle(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 15)),
                                       const SizedBox(width: 12),
                                     ],
                                   ),
                                 ),
 
-                                Divider(),
+                               const Divider(),
 
                                 InkWell(
                                   onTap: () async {
-                                    TimeOfDay _selectedTime = _endTime;
-
-                                    TimeOfDay? picked = await showTimePicker(
-                                      context: context,
-                                      initialTime: _selectedTime,
-                                      builder: (BuildContext context, Widget? child) {
-                                        return MediaQuery(
-                                          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-                                          child: child!,
-                                        );
-                                      },
-                                    );
-                                    if (picked != null && picked != _selectedTime) {
-                                      shiftsProvider.updateBreak(
-                                        index,
-                                        {
-                                          'unique_id': _breakList[index]['unique_id'],
-                                          'start_time': _startTime,
-                                          'end_time': picked,
-                                          'interval_unique_id': interval!['unique_id']
+                                    if(fromEmployee == false) {
+                                      TimeOfDay _selectedTime = TimeOfDay(hour: endTimeDate.hour, minute: endTimeDate.minute);
+                                      TimeOfDay? picked = await showTimePicker(
+                                        context: context,
+                                        initialTime: _selectedTime,
+                                        builder: (BuildContext context, Widget? child) {
+                                          return MediaQuery(
+                                            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                                            child: child!,
+                                          );
                                         },
                                       );
+                                      if (picked != null && picked != _selectedTime) {
+                                        shiftsProvider.updateBreak(
+                                            _break.id!, picked, 'end'
+                                        );
+                                      }
                                     }
                                   },
                                   child: Row(
                                     children: [
                                       const SizedBox(width: 8),
-                                      Text('Pausa', style:
-                                      TextStyle(color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 15)),
+                                      Text('fine della pausa', style:
+                                      TextStyle(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 15)),
                                       Spacer(),
                                       Text('${formattedEndTime}', style:
-                                      TextStyle(color: Colors.black54, fontWeight: FontWeight.w500, fontSize: 15)),
+                                      TextStyle(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 15)),
                                       const SizedBox(width: 12),
                                     ],
                                   ),
@@ -207,26 +205,30 @@ class BreakTimesWidget extends StatelessWidget {
                   },
                 ),
 
+                fromEmployee == true? const SizedBox():
                 InkWell(
                   onTap: () {
+                    DateTime now = DateTime.now();
+                    DateTime startTime = DateTime(now.year, now.month, now.day, 9, 0);
+                    DateTime endTime = DateTime(now.year, now.month, now.day, 17, 0);
                     final Random random = Random();
-                    shiftsProvider.addBreak(
-                        {
-                          'unique_id': '${DateTime.now().hour.toString()}' '${DateTime.now().minute.toString()}.' '${random.nextInt(10000) + 1}',
-                          'start_time': TimeOfDay(hour: 9, minute: 0),
-                          'end_time': TimeOfDay(hour: 17, minute: 0),
-                          'interval_unique_id': interval!['unique_id'],
-                        }
+                    shiftsProvider.addIntervalBreak(
+                       IntervalBreakModel(
+                         id: random.nextInt(10000) + 1,
+                         intervalId: interval!.id,
+                         startTime: startTime.toString(),
+                         endTime: endTime.toString()
+                       )
                     );
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text('Altro pausa', style: TextStyle(color: Colors.black54, fontSize: 15)),
+                      Text('Altro pausa', style: TextStyle(color: Colors.white70, fontSize: 15)),
 
                       const SizedBox(width: 5),
 
-                      Icon(Icons.add, color: Colors.black54),
+                      Icon(Icons.add, color: Colors.white70),
                     ],
                   ),
                 ),

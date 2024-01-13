@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:turnarix/provider/auth_provider.dart';
-import 'package:turnarix/provider/profile_provider.dart';
 import 'package:turnarix/utill/color_resources.dart';
 import 'package:turnarix/utill/dimensions.dart';
-import 'package:turnarix/utill/images.dart';
-import 'package:turnarix/view/base/custom_app_bar.dart';
+import 'package:turnarix/provider/calendar_provider.dart';
 import 'package:turnarix/view/base/custom_button.dart';
 import 'package:turnarix/view/base/custom_snackbar.dart';
 import 'package:turnarix/view/screens/auth/create_new_password_screen.dart';
@@ -142,6 +140,7 @@ class EmailVerificationScreen extends StatelessWidget {
                                       .registration(authProvider.signUpModel!)
                                       .then((status) async {
                                     if (status.isSuccess) {
+                                      Provider.of<CalendarProvider>(context, listen: false).getCalendarShifts(context);
                                       Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext? context)=> DashboardScreen(pageIndex: 0)));
                                     }
                                   });

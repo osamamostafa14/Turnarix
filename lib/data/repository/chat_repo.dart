@@ -11,9 +11,9 @@ class ChatRepo {
   final DioClient? dioClient;
   ChatRepo({@required this.dioClient});
 
-  Future<ApiResponse> getChatList() async {
+  Future<ApiResponse> getChatList(int employeeId) async {
     try {
-      final response = await dioClient!.get('${AppConstants.MESSAGE_URI}');
+      final response = await dioClient!.get('${AppConstants.MESSAGE_URI}?employee_id=$employeeId');
       return ApiResponse.withSuccess(response);
     } catch (e) {
       return ApiResponse.withError(ApiErrorHandler.getMessage(e));
@@ -31,8 +31,8 @@ class ChatRepo {
     }
   }
 
-  Future<http.StreamedResponse> sendMessage(String message, String token, [File? file]) async {
-    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SEND_MESSAGE_URI}'));
+  Future<http.StreamedResponse> sendMessage(String message, String token, int employeeId, [File? file]) async {
+    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SEND_MESSAGE_URI}?employee_id=$employeeId'));
     request.headers.addAll(<String,String>{'Authorization': 'Bearer $token'});
     if(file != null) {
       request.files.add(http.MultipartFile('image', file.readAsBytes().asStream(), file.lengthSync(), filename: file.path.split('/').last));
@@ -46,8 +46,8 @@ class ChatRepo {
     return response;
   }
 
-  Future<http.StreamedResponse> sendImage(File file, String token, String message,serviceId, String imageId) async {
-    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SEND_IMAGE_URI}?message=$message&image_id=$imageId&service_id=$serviceId'));
+  Future<http.StreamedResponse> sendImage(File file, String token, String message,employeeId) async {
+    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse('${AppConstants.BASE_URL}${AppConstants.SEND_IMAGE_URI}?message=$message&employee_id=$employeeId'));
     request.headers.addAll(<String,String>{'Authorization': 'Bearer ${token}'});
     if(file != null) {
       print('----------------${file.readAsBytes().asStream()}/${file.lengthSync()}/${file.path.split('/').last}');
@@ -68,6 +68,25 @@ class ChatRepo {
     print(response);
     return response;
 
+  }
+
+/// main messages
+  Future<ApiResponse> getMainMessagesList(String offset) async {
+    try {
+      final response = await dioClient!.get('${AppConstants.MAIN_MESSAGES_URI}?limit=10&offset=$offset');
+      return ApiResponse.withSuccess(response);
+    } catch (e) {
+      return ApiResponse.withError(ApiErrorHandler.getMessage(e));
+    }
+  }
+
+  Future<ApiResponse> getUsersList(String offset) async {
+    try {
+      final response = await dioClient!.get('${AppConstants.CHAT_USERS_LIST_URI}?limit=10&offset=$offset');
+      return ApiResponse.withSuccess(response);
+    } catch (e) {
+      return ApiResponse.withError(ApiErrorHandler.getMessage(e));
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 class Images {
   static const String main_logo = 'assets/images/main-logo.png';
-  static const String placeholder_rectangle = 'assets/images/placeholder_image.png';
+  static const String placeholder_rectangle = 'assets/images/placeholder_rectangle.png';
   static const String splash_bg = 'assets/images/splash-bg.png';
   static const String marker_icon = 'assets/icons/marker.png';
   static const String log_out = 'assets/image/log_out.png';
@@ -18,4 +18,8 @@ class Images {
   static const String contact_us_icon = 'assets/images/contact.png';
   static const String day_icon = 'assets/icons/day-icon.png';
   static const String color_picker_icon = 'assets/icons/color-picker.png';
+  static const String loading_icon = 'assets/icons/loading-icon.png';
+  static const String calendar_img = 'assets/images/calendar-img.png';
+  static const String image = 'assets/images/image.png';
+  static const String send = 'assets/images/send.png';
 }

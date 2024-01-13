@@ -1,4 +1,4 @@
-import 'package:turnarix/utill/color_resources.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -80,21 +80,22 @@ class _CustomTextFieldNewState extends State<CustomTextFieldNew> {
               : null,
           // labelText: widget.hintText,
           labelText: widget.title,
-          labelStyle: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
+          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           hintText: widget.hintText, // hassan00942
           alignLabelWithHint: true, // hassan00942
           contentPadding:
           const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(0), // CustomTextFieldNew border radius + hassan00942 + inputFieldsRoundedCorner00942
+            borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(
               width: 2,
+              color: Colors.white70 // why border color not changing
             ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(0), // CustomTextFieldNew border radius + hassan00942 + inputFieldsRoundedCorner00942
+            borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-                color: Colors.black54,
+                color: Colors.white70,
                 width: 2),
           ),
           // prefixIcon: widget.prefixIcon,
